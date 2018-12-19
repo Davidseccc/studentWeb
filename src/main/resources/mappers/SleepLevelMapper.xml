@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cz.uhk.mhealth.model.fitbit.table.mappers.SleepLevelMapper">
+    <insert id="saveOrReplace" parameterType="Data">
+        INSERT INTO sleeplevel (
+        id,
+        timestamp,
+        sleepleveltype,
+        seconds,
+        user_id
+        )
+        VALUES (
+        #{id},
+        #{dateTime},
+        #{sleepLevel.id},
+        #{seconds},
+        #{userId}
+
+        )
+        ON CONFLICT (id)
+        DO UPDATE SET
+        id = EXCLUDED.id,
+        timestamp = EXCLUDED.timestamp,
+        sleepleveltype = EXCLUDED.sleepleveltype,
+        seconds = EXCLUDED.seconds,
+        user_id = EXCLUDED.user_id
+    </insert>
+
+    <insert id="saveOrReplaceList" parameterType="Data">
+        INSERT INTO sleeplevel (
+        id,
+        timestamp,
+        sleepleveltype,
+        seconds,
+        user_id
+
+        )
+        VALUES
+        <foreach collection="list" item="data" separator=",">
+            (
+            #{data.id},
+            #{data.dateTime},
+            #{data.sleepLevel.id},
+            #{data.seconds},
+            #{data.userId}
+            )
+        </foreach>
+
+         ON CONFLICT (id)
+ --         DO NOTHING;
+        DO UPDATE SET
+         id = EXCLUDED.id,
+         timestamp = EXCLUDED.timestamp,
+         sleepleveltype = EXCLUDED.sleepleveltype,
+         seconds = EXCLUDED.seconds,
+         user_id = EXCLUDED.user_id
+    </insert>
+
+    <select id="getLastSleepDate" resultType="java.time.LocalDate">
+        SELECT MAX(timestamp)
+        FROM sleeplevel
+        WHERE user_id = #{userId};
+    </select>
+
+    <select id="getSleepForUserFromTo" resultType="Data">
+        SELECT id, timestamp as dateTime, sleepleveltype, seconds, user_id as userId
+        FROM sleeplevel
+        WHERE timestamp BETWEEN #{from} AND #{to} AND user_id = #{userId} ORDER BY timestamp ASC;
+    </select>
+
+
+</mapper>

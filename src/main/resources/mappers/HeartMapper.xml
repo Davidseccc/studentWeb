@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cz.uhk.mhealth.model.fitbit.table.mappers.HeartMapper">
+    <insert id="saveOrReplace" parameterType="ActivitiesHeartDTO">
+        INSERT INTO heart (
+        logId,
+        user_id,
+        timestamp,
+        resting
+        )
+        VALUES (
+        #{logId},
+        #{userId},
+        #{timestamp},
+        #{resting},
+        )
+        ON CONFLICT (logid) DO UPDATE SET
+        logId = EXCLUDED.logId,
+        user_id = EXCLUDED.user_id,
+        timestamp = EXCLUDED.timestamp,
+        resting = EXCLUDED.resting
+    </insert>
+
+    <insert id="saveOrReplaceList" parameterType="ActivitiesHeartDTO">
+        INSERT INTO heart (
+        logId,
+        user_id,
+        timestamp,
+        resting
+        )
+        VALUES
+        <foreach collection="list" item="sleep" separator=",">
+            (
+            #{sleep.logId},
+            #{sleep.userId},
+            #{sleep.timestamp},
+            #{sleep.resting}
+            )
+        </foreach>
+        ON CONFLICT (logid) DO UPDATE SET
+        logId = EXCLUDED.logId,
+        user_id = EXCLUDED.user_id,
+        timestamp = EXCLUDED.timestamp,
+        resting = EXCLUDED.resting
+    </insert>
+
+    <select id="getLastHeartDate" resultType="java.time.LocalDate">
+        SELECT MAX(timestamp)
+        FROM heart
+        WHERE user_id = #{userId};
+    </select>
+
+    <select id="getHRForUserFromTo" resultType="ActivitiesHeartDTO">
+        SELECT logid as logId, user_id as userId, timestamp, resting
+        FROM heart
+        WHERE timestamp BETWEEN #{from} AND #{to} AND user_id = #{userId} ORDER BY timestamp;
+    </select>
+
+</mapper>

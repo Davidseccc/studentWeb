@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cz.uhk.mhealth.model.fitbit.table.mappers.RecordMapper">
+    <insert id="saveOrReplace" parameterType="Record">
+        INSERT INTO record (user_id, typeid, timestamp, value)
+        VALUES (#{userId}, #{typeId}, #{timestamp}, #{value})
+        ON CONFLICT (user_id, typeid, timestamp)
+        DO UPDATE
+        SET value = EXCLUDED.value
+    </insert>
+
+    <insert id="saveOrReplaceList" parameterType="Record">
+        INSERT INTO record (user_id, typeid, timestamp, value)
+        VALUES
+        <foreach collection="list" item="record" separator=",">
+            (#{record.userId}, #{record.typeId}, #{record.timestamp}, #{record.value})
+        </foreach>
+        ON CONFLICT (user_id, typeid, timestamp)
+        DO UPDATE
+        SET value = EXCLUDED.value
+    </insert>
+
+    <delete id="removeOrphans">
+        DELETE FROM record
+        WHERE user_id NOT IN (SELECT id
+        FROM mhealthuser)
+    </delete>
+
+    <select id="getLastRecordDate" resultType="java.time.LocalDateTime">
+        SELECT MAX(timestamp)
+        FROM record
+        WHERE user_id = #{userId} AND typeid = #{typeId} AND value > 0;
+    </select>
+
+    <select id="getRecordCountForUser" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM record
+        WHERE user_id = #{userId} AND typeid = #{typeId};
+    </select>
+
+    <select id="getRecordsForUserFrom" resultType="Record">
+        SELECT *
+        FROM record
+        WHERE timestamp > #{from} AND typeid = #{typeId} AND user_id = #{userId};
+    </select>
+
+    <select id="getRecordsForUser" resultType="Record">
+        SELECT r.id, r.user_id as userId, r.typeid, r.timestamp, r.value
+        FROM record as r
+        WHERE timestamp BETWEEN #{from} AND #{to} AND typeid = #{typeId} AND user_id = #{userId};
+    </select>
+
+    <select id="getAverageFrom" resultType="java.lang.Double">
+        SELECT AVG(value)
+        FROM record
+        WHERE timestamp > #{from} AND typeid = #{typeId} AND user_id = #{userId};
+    </select>
+
+    <select id="getAverage" resultType="java.lang.Double">
+        SELECT AVG(value)
+        FROM record
+        WHERE timestamp BETWEEN #{from} AND #{to} AND typeid = #{typeId} AND user_id = #{userId};
+    </select>
+
+    <select id="getSumFrom" resultType="java.lang.Double">
+        SELECT SUM(value)
+        FROM record
+        WHERE timestamp > #{from} AND typeid = #{typeId} AND user_id = #{userId};
+    </select>
+
+    <select id="getSum" resultType="java.lang.Double">
+        SELECT SUM(value)
+        FROM record
+        WHERE timestamp BETWEEN #{from} AND #{to} AND typeid = #{typeId} AND user_id = #{userId};
+    </select>
+
+    <select id="getMaxFrom" resultType="java.lang.Double">
+        SELECT MAX(value)
+        FROM record
+        WHERE timestamp > #{from} AND typeid = #{typeId} AND user_id = #{userId};
+    </select>
+
+    <select id="getMax" resultType="java.lang.Double">
+        SELECT MAX(value)
+        FROM record
+        WHERE timestamp BETWEEN #{from} AND #{to} AND typeid = #{typeId} AND user_id = #{userId};
+    </select>
+</mapper>

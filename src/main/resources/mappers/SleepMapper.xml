@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cz.uhk.mhealth.model.fitbit.table.mappers.SleepMapper">
+    <insert id="saveOrReplace" parameterType="Sleep">
+        INSERT INTO sleep (
+        logid,
+        user_id,
+        dateofsleep,
+        starttime,
+        endtime,
+        duration,
+        efficiency,
+        infocode,
+        minutesafterwakeup,
+        minutesasleep,
+        minutesawake,
+        timeinbed,
+        type,
+        deepcount,
+        deepminutes,
+        lightcount,
+        lightminutes,
+        remcount,
+        remminutes,
+        wakecount,
+        wakeminutes,
+        asleepcount,
+        asleepminutes,
+        awakecount,
+        awakeminutes,
+        restlesscount,
+        restlessminutes
+        )
+        VALUES (
+        #{logId},
+        #{userId},
+        #{dateOfSleep},
+        #{startTime},
+        #{endTime},
+        #{duration},
+        #{efficiency},
+        #{infoCode},
+        #{minutesAfterWakeup},
+        #{minutesAsleep},
+        #{minutesAwake},
+        #{timeInBed},
+        #{type},
+        #{deepCount},
+        #{deepMinutes},
+        #{lightCount},
+        #{lightMinutes},
+        #{remCount},
+        #{remMinutes},
+        #{wakeCount},
+        #{wakeMinutes},
+        #{asleepCount},
+        #{asleepMinutes},
+        #{awakeCount},
+        #{awakeMinutes},
+        #{restlessCount},
+        #{restlessMinutes}
+        )
+        ON CONFLICT (logid)
+        DO UPDATE SET
+        user_id = EXCLUDED.user_id,
+        dateofsleep = EXCLUDED.dateofsleep,
+        starttime = EXCLUDED.starttime,
+        endtime = EXCLUDED.endtime,
+        duration = EXCLUDED.duration,
+        efficiency = EXCLUDED.efficiency,
+        infocode = EXCLUDED.infocode,
+        minutesafterwakeup = EXCLUDED.minutesafterwakeup,
+        minutesasleep = EXCLUDED.minutesasleep,
+        minutesawake = EXCLUDED.minutesawake,
+        timeinbed = EXCLUDED.timeinbed,
+        type = EXCLUDED.type,
+        deepcount = EXCLUDED.deepcount,
+        deepminutes = EXCLUDED.deepminutes,
+        lightcount = EXCLUDED.lightcount,
+        lightminutes = EXCLUDED.lightminutes,
+        remcount = EXCLUDED.remcount,
+        remminutes = EXCLUDED.remminutes,
+        wakecount = EXCLUDED.wakecount,
+        wakeminutes = EXCLUDED.wakeminutes,
+        asleepcount = EXCLUDED.asleepcount,
+        asleepminutes = EXCLUDED.asleepminutes,
+        awakecount = EXCLUDED.awakecount,
+        awakeminutes = EXCLUDED.awakeminutes,
+        restlesscount = EXCLUDED.restlesscount,
+        restlessminutes = EXCLUDED.restlessminutes
+    </insert>
+
+    <insert id="saveOrReplaceList" parameterType="Sleep">
+        INSERT INTO sleep (
+        logid,
+        user_id,
+        dateofsleep,
+        starttime,
+        endtime,
+        duration,
+        efficiency,
+        infocode,
+        minutesafterwakeup,
+        minutesasleep,
+        minutesawake,
+        timeinbed,
+        type,
+        deepcount,
+        deepminutes,
+        lightcount,
+        lightminutes,
+        remcount,
+        remminutes,
+        wakecount,
+        wakeminutes,
+        asleepcount,
+        asleepminutes,
+        awakecount,
+        awakeminutes,
+        restlesscount,
+        restlessminutes
+        )
+        VALUES
+        <foreach collection="list" item="sleep" separator=",">
+            (#{sleep.logId},
+            #{sleep.userId},
+            #{sleep.dateOfSleep},
+            #{sleep.startTime},
+            #{sleep.endTime},
+            #{sleep.duration},
+            #{sleep.efficiency},
+            #{sleep.infoCode},
+            #{sleep.minutesAfterWakeup},
+            #{sleep.minutesAsleep},
+            #{sleep.minutesAwake},
+            #{sleep.timeInBed},
+            #{sleep.type},
+            #{sleep.deepCount},
+            #{sleep.deepMinutes},
+            #{sleep.lightCount},
+            #{sleep.lightMinutes},
+            #{sleep.remCount},
+            #{sleep.remMinutes},
+            #{sleep.wakeCount},
+            #{sleep.wakeMinutes},
+            #{sleep.asleepCount},
+            #{sleep.asleepMinutes},
+            #{sleep.awakeCount},
+            #{sleep.awakeMinutes},
+            #{sleep.restlessCount},
+            #{sleep.restlessMinutes})
+        </foreach>
+        ON CONFLICT (logid) DO UPDATE SET
+        user_id = EXCLUDED.user_id,
+        dateOfSleep = EXCLUDED.dateOfSleep,
+        starttime = EXCLUDED.starttime,
+        endtime = EXCLUDED.endtime,
+        duration = EXCLUDED.duration,
+        efficiency = EXCLUDED.efficiency,
+        infocode = EXCLUDED.infocode,
+        minutesafterwakeup = EXCLUDED.minutesafterwakeup,
+        minutesasleep = EXCLUDED.minutesasleep,
+        minutesawake = EXCLUDED.minutesawake,
+        timeinbed = EXCLUDED.timeinbed,
+        type = EXCLUDED.type,
+        deepcount = EXCLUDED.deepcount,
+        deepminutes = EXCLUDED.deepminutes,
+        lightcount = EXCLUDED.lightcount,
+        lightminutes = EXCLUDED.lightminutes,
+        remcount = EXCLUDED.remcount,
+        remminutes = EXCLUDED.remminutes,
+        wakecount = EXCLUDED.wakecount,
+        wakeminutes = EXCLUDED.wakeminutes,
+        asleepcount = EXCLUDED.asleepcount,
+        asleepminutes = EXCLUDED.asleepminutes,
+        awakecount = EXCLUDED.awakecount,
+        awakeminutes = EXCLUDED.awakeminutes,
+        restlesscount = EXCLUDED.restlesscount,
+        restlessminutes = EXCLUDED.restlessminutes
+    </insert>
+
+    <delete id="removeOrphans">
+        DELETE FROM sleep
+        WHERE user_id NOT IN (SELECT id
+        FROM mhealthuser)
+    </delete>
+
+    <select id="getLastSleepDate" resultType="java.time.LocalDate">
+        SELECT MAX(dateOfSleep)
+        FROM sleep
+        WHERE user_id = #{userId};
+    </select>
+
+    <select id="getSleepCountForUser" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM sleep
+        WHERE user_id = #{userId};
+    </select>
+
+    <select id="getSleepsForUserFrom" resultType="Sleep">
+        SELECT *
+        FROM sleep
+        WHERE dateOfSleep >= #{from} AND user_id = #{userId}
+        ORDER BY starttime;
+    </select>
+
+    <select id="getSleepsForUser" resultType="Sleep">
+        SELECT *
+        FROM sleep
+        WHERE dateOfSleep BETWEEN #{from} AND #{to} AND user_id = #{userId}
+        ORDER BY starttime;
+    </select>
+
+</mapper>
